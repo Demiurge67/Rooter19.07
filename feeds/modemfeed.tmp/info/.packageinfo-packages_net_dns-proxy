@@ -1,0 +1,23 @@
+Source-Makefile: feeds/modemfeed/packages/net/dns-proxy/Makefile
+
+Package: dns-proxy
+Version: 0.1-1
+Depends: +libc +GCC_LIBSSP:libssp +USE_GLIBC:librt +USE_GLIBC:libpthread 
+Conflicts: 
+Menu-Depends: 
+Provides: 
+Section: net
+Category: Network
+Repository: base
+Title: A simple dns proxy to tunnel DNS requests over a socks proxy
+Maintainer: qiuchengxuan <qiuchengxuan@gmail.com>
+Source: dns-proxy-0.1.tar.xz
+License: Apache-2.0
+Type: ipkg
+Description: A simple dns proxy to tunnel DNS requests over a socks proxy (for example, over ssh or Tor). This can come in handy when setting up transparent proxies.
+It chooses a random DNS server for each request from the file "resolv.conf" which is a newline delimited list of DNS servers.
+The daemon must be run as root in order for it to bind to port 53.
+qiuchengxuan <qiuchengxuan@gmail.com>
+@@
+
+

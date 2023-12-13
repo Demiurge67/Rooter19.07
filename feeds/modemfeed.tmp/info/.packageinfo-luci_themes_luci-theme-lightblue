@@ -1,0 +1,23 @@
+Source-Makefile: feeds/modemfeed/luci/themes/luci-theme-lightblue/Makefile
+Build-Depends: lua/host luci-base/host LUCI_CSSTIDY:csstidy/host 
+
+Package: luci-theme-lightblue
+Submenu: 4. Themes
+Version: x-1
+Depends: +libc +GCC_LIBSSP:libssp +USE_GLIBC:librt +USE_GLIBC:libpthread 
+Conflicts: 
+Menu-Depends: 
+Provides: 
+Section: luci
+Category: LuCI
+Repository: base
+Title: Bootstrap lightblue Theme
+Maintainer: 
+Source: 
+License: Apache-2.0
+Type: ipkg
+Description: Bootstrap lightblue Theme
+
+@@
+
+

@@ -385,16 +385,16 @@ msgstr ""
 "unbeschränkt."
 
 #: applications/luci-app-nlbwmon/luasrc/view/nlbw/display.htm:13
-msgid "Usage Statistics"
-msgstr "Nutzungsstatistiken"
+msgid "Netlink Bandwidth Monitor"
+msgstr "Netlink-Bandbreitenmonitor"
 
 #: applications/luci-app-nlbwmon/luasrc/view/nlbw/backup.htm:9
-msgid "Backup / Restore"
-msgstr "Sichern/Wiederherstellen"
+msgid "Netlink Bandwidth Monitor - Backup / Restore"
+msgstr "Netlink-Bandbreitenmonitor - Sichern/Wiederherstellen"
 
 #: applications/luci-app-nlbwmon/luasrc/model/cbi/nlbw/config.lua:12
-msgid "Configuration"
-msgstr "Konfiguration"
+msgid "Netlink Bandwidth Monitor - Configuration"
+msgstr "Netlink-Bandbreitenmonitor - Konfiguration"
 
 #: applications/luci-app-nlbwmon/htdocs/luci-static/resources/view/nlbw.js:475
 #: applications/luci-app-nlbwmon/htdocs/luci-static/resources/view/nlbw.js:533
@@ -470,8 +470,12 @@ msgstr "Gespeicherte Zeiträume"
 
 #: applications/luci-app-nlbwmon/luasrc/model/cbi/nlbw/config.lua:13
 msgid ""
-"Configure Usage Statistics"
-msgstr "Konfigurieren Sie die Nutzungsstatistik"
+"The Netlink Bandwidth Monitor (nlbwmon) is a lightweight, efficient traffic "
+"accounting program keeping track of bandwidth usage per host and protocol."
+msgstr ""
+"Der Netlink-Bandbreitenmonitor (nlbwmon) ist ein leichtes, effizientes "
+"Programm zur Datenverkehrsabrechnung, das die Bandbreitennutzung pro Host "
+"und Protokoll verfolgt."
 
 #: applications/luci-app-nlbwmon/luasrc/controller/nlbw.lua:216
 msgid "The following database files have been restored: %s"
@@ -564,5 +568,3 @@ msgstr "kein Datenverkehr"
 #: applications/luci-app-nlbwmon/htdocs/luci-static/resources/view/nlbw.js:522
 msgid "other"
 msgstr "anderes"
-msgid "Refresh Statistics"
-msgstr "Statistiken aktualisieren"

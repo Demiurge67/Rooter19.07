@@ -1,0 +1,43 @@
+Source-Makefile: feeds/modemfeed/luci/applications/luci-app-mmconfig/Makefile
+Build-Depends: lua/host luci-base/host LUCI_CSSTIDY:csstidy/host 
+
+Package: luci-app-mmconfig
+Submenu: 3. Applications
+Version: 0.0.5-4-1
+Depends: +libc +GCC_LIBSSP:libssp +USE_GLIBC:librt +USE_GLIBC:libpthread +modemmanager +luci-compat
+Conflicts: 
+Menu-Depends: 
+Provides: 
+Section: luci
+Category: LuCI
+Repository: base
+Title: Configrure modem bands via mmcli utility
+Maintainer: 
+Source: 
+License: GPLv3
+Type: ipkg
+Description: Configrure modem bands via mmcli utility
+
+@@
+
+Package: luci-i18n-mmconfig-ru
+Default: LUCI_LANG_ru||(ALL&&m)
+Version: 0.0.5-4-1
+Depends: +libc +GCC_LIBSSP:libssp +USE_GLIBC:librt +USE_GLIBC:libpthread luci-app-mmconfig
+Conflicts: 
+Menu-Depends: 
+Provides: 
+Section: luci
+Category: LuCI
+Repository: base
+Title: luci-app-mmconfig - ru translation
+Maintainer: 
+Source: 
+License: GPLv3
+Type: ipkg
+Hidden: 1
+Description:     Translation for luci-app-mmconfig - Русский (Russian)
+
+@@
+
+

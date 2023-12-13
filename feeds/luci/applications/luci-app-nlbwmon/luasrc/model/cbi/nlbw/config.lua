@@ -9,8 +9,8 @@ local nw  = require "luci.model.network"
 
 local s, m, period, warning, date, days, interval, ifaces, subnets, limit, prealloc, compress, generations, commit, refresh, directory, protocols
 
-m = Map("nlbwmon", translate("Configuration"),
-	translate("Configure Usage Statistics"))
+m = Map("nlbwmon", translate("Netlink Bandwidth Monitor - Configuration"),
+	translate("The Netlink Bandwidth Monitor (nlbwmon) is a lightweight, efficient traffic accounting program keeping track of bandwidth usage per host and protocol."))
 
 nw.init(luci.model.uci.cursor_state())
 

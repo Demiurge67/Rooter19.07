@@ -2,6 +2,8 @@
 # MT7621 Profiles
 #
 
+include ./common-sercomm.mk
+
 KERNEL_DTB += -d21
 DEVICE_VARS += TPLINK_BOARD_ID TPLINK_HEADER_VERSION TPLINK_HWID TPLINK_HWREV
 
@@ -16,6 +18,19 @@ define Build/elecom-gst-factory
   ) > $@.new
   mv $@.new $@
   echo -n "MT7621_ELECOM_$(product)" >> $@
+endef
+
+define Build/arcadyan-trx
+	echo -ne "hsqs" > $@.hsqs
+	$(eval trx_magic=$(word 1,$(1)))
+	$(STAGING_DIR_HOST)/bin/otrx create $@.trx -M $(trx_magic) -f $@ \
+		-a 0x20000 -b 0x420000 -f $@.hsqs -a 1000
+	mv $@.trx $@
+	dd if=/dev/zero bs=1024 count=1 >> $@.tail
+	echo -ne "HDR0" | dd of=$@.tail bs=1 seek=$$((0x10c)) count=4 \
+		conv=notrunc 2>/dev/null
+	dd if=$@.tail >> $@ 2>/dev/null
+	rm $@.hsqs $@.tail
 endef
 
 define Build/elecom-wrc-factory
@@ -52,6 +67,7 @@ endef
 # We don't wan't to set the header name field for the kernel include in the
 # sysupgrade image as well, as this image shouldn't be accepted by the OEM
 # webinterface. It will soft-brick the board.
+
 define Build/wr1201-factory-header
 	mkimage -A $(LINUX_KARCH) \
 		-O linux -T kernel \
@@ -108,13 +124,122 @@ define Device/alfa-network_quad-e4g
 endef
 TARGET_DEVICES += alfa-network_quad-e4g
 
+define Device/asus_rt-n56u-b1
+  DTS := mt7621_asus_rt-n56u-b1
+  DEVICE_TITLE := ASUS RT-N56U-B1
+  IMAGE_SIZE := 16064k
+  DEVICE_PACKAGES := kmod-mt7603 kmod-mt76x2 kmod-usb3 kmod-usb-ledtrig-usbport
+endef
+TARGET_DEVICES += asus_rt-n56u-b1
+
 define Device/asus_rt-ac57u
   DTS := RT-AC57U
   DEVICE_TITLE := ASUS RT-AC57U
   IMAGE_SIZE := 16064k
-  DEVICE_PACKAGES := kmod-mt7603 kmod-mt76x2 kmod-usb3 kmod-usb-ledtrig-usbport wpad-basic
+  DEVICE_PACKAGES := kmod-mt7603 kmod-mt76x2 kmod-usb3 kmod-usb-ledtrig-usbport
 endef
 TARGET_DEVICES += asus_rt-ac57u
+
+define Device/beeline_smartbox-flash
+  $(Device/uimage-lzma-loader)
+  DTS := beeline_smartbox-flash
+  BOARD_NAME := Beeline SmartBox Flash
+  IMAGE_SIZE := 32768k
+  KERNEL_SIZE := 4352k
+  UBINIZE_OPTS := -E 5
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL := kernel-bin | append-dtb | lzma | loader-kernel | \
+	uImage none | arcadyan-trx 0x746f435d | pad-to $$(KERNEL_SIZE)
+  KERNEL_INITRAMFS := kernel-bin | append-dtb | lzma | loader-kernel | \
+	uImage none
+  IMAGES += factory.trx
+  IMAGE/factory.trx := append-kernel | append-ubi | check-size
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  DEVICE_TITLE := Beeline SmartBox Flash
+  DEVICE_PACKAGES := kmod-usb3 kmod-mt7615e uboot-envtools uencrypt
+endef
+TARGET_DEVICES += beeline_smartbox-flash
+
+define Device/beeline_smartbox-turbo-plus
+  $(Device/sercomm_cxx)
+  DTS := beeline_smartbox-turbo-plus
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  IMAGE_SIZE := 32768k
+  SERCOMM_HWID := CQR
+  SERCOMM_HWVER := 10000
+  SERCOMM_SWVER := 2010 
+  KERNEL := kernel-bin | append-dtb | lzma | loader-kernel | lzma -a0 | \
+	uImage lzma
+  IMAGE/factory.img := append-kernel | sercomm-kernel-factory | \
+	append-ubi | sercomm-factory-cqr
+  IMAGE/sysupgrade.bin := append-kernel | sercomm-kernel | \
+	sysupgrade-tar kernel=$$$$@ | append-metadata
+  DEVICE_TITLE := Beeline SmartBox TURBO+ AC2000
+  DEVICE_PACKAGES := kmod-mt7603 kmod-mt7615e kmod-usb3 kmod-usb-ledtrig-usbport uboot-envtools
+endef
+TARGET_DEVICES += beeline_smartbox-turbo-plus
+
+define Device/beeline_sb-turbo-plus
+  $(Device/uimage-lzma-loader)
+  DTS := BeelineSB-Turbo-plus
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_SIZE := 4096k
+  IMAGE_SIZE := 124416k
+  UBINIZE_OPTS := -E 5
+  IMAGES += kernel1.bin rootfs0.bin breed.bin
+  IMAGE/kernel1.bin := append-kernel
+  IMAGE/rootfs0.bin := append-ubi | check-size $$$$(IMAGE_SIZE)
+  IMAGE/breed.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-kernel | \
+	pad-to $$(KERNEL_SIZE) | append-ubi | check-size $$$$(IMAGE_SIZE)
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  DEVICE_TITLE := Beeline SmartBox TURBO+(Breed)
+  DEVICE_PACKAGES := kmod-mt7603 kmod-mt7615e kmod-usb3 \
+	kmod-usb-ledtrig-usbport uboot-envtools 
+endef
+TARGET_DEVICES += beeline_sb-turbo-plus
+
+define Device/beeline_smartbox-pro
+  $(Device/uimage-lzma-loader)
+  DTS := BeelineSB-Pro
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_SIZE:= 4096k
+  IMAGE_SIZE := 255488k
+  UBINIZE_OPTS := -E 5
+  IMAGES += kernel1.bin rootfs0.bin breed.bin
+  IMAGE/kernel1.bin := append-kernel
+  IMAGE/rootfs0.bin := append-ubi | check-size $$$$(IMAGE_SIZE)
+  IMAGE/breed.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-kernel | \
+  	pad-to $$(KERNEL_SIZE) | append-ubi | check-size $$$$(IMAGE_SIZE)
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  DEVICE_TITLE := Beeline SmartBox PRO (breed)
+  DEVICE_PACKAGES := kmod-mt76x2 kmod-usb3 kmod-usb-ledtrig-usbport uboot-envtools 
+endef
+TARGET_DEVICES += beeline_smartbox-pro
+
+define Device/wifire_s1500-nbn
+  $(Device/sercomm_s1500)
+  DTS := mt7621_wifire_s1500-nbn
+  DEVICE_VENDOR := WiFire
+  DEVICE_MODEL := S1500.NBN
+  DEVICE_ALT0_VENDOR := Sercomm
+  DEVICE_ALT0_MODEL := S1500 BUC
+  IMAGE_SIZE := 51200k
+  IMAGE/factory.img := append-kernel | sercomm-kernel-factory | \
+	sercomm-reset-slot1-chksum | append-ubi | check-size | \
+	sercomm-factory-cqr | sercomm-fix-buc-pid | sercomm-mkhash | \
+	sercomm-crypto
+  SERCOMM_HWID := BUC
+  SERCOMM_HWVER := 10000
+  SERCOMM_ROOTFS2_OFFSET := 0x4d00000
+  SERCOMM_SWVER := 2015
+  DEVICE_TITLE := Wifire_S1500-NBN
+  DEVICE_PACKAGES := kmod-mt76x2 kmod-usb3 kmod-usb-ledtrig-usbport uboot-envtools
+endef
+TARGET_DEVICES += wifire_s1500-nbn
 
 define Device/dir-860l-b1
   $(Device/seama)
@@ -306,44 +431,6 @@ define Device/xiaomi_mir3g
 endef
 TARGET_DEVICES += xiaomi_mir3g
 
-define Device/beeline_smartbox-turbo-plus
-  $(Device/uimage-lzma-loader)
-  DTS := BeelineSB-Turbo-plus
-  BLOCKSIZE := 128k
-  PAGESIZE := 2048
-  KERNEL_SIZE := 4096k
-  IMAGE_SIZE := 124416k
-  UBINIZE_OPTS := -E 5
-  IMAGES += kernel1.bin rootfs0.bin breed.bin
-  IMAGE/kernel1.bin := append-kernel
-  IMAGE/rootfs0.bin := append-ubi | check-size $$$$(IMAGE_SIZE)
-  IMAGE/breed.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-kernel | \
-	pad-to $$(KERNEL_SIZE) | append-ubi | check-size $$$$(IMAGE_SIZE)
-  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
-  DEVICE_TITLE := Beeline SmartBox TURBO+
-  DEVICE_PACKAGES := kmod-mt7603 kmod-mt7615e kmod-usb3 \
-	kmod-usb-ledtrig-usbport uboot-envtools wpad-basic
-endef
-TARGET_DEVICES += beeline_smartbox-turbo-plus
-
-define Device/beeline_smartbox-pro
-  $(Device/uimage-lzma-loader)
-  DTS := BeelineSB-Pro
-  BLOCKSIZE := 128k
-  PAGESIZE := 2048
-  KERNEL_SIZE:= 4096k
-  IMAGE_SIZE := 255488k
-  UBINIZE_OPTS := -E 5
-  IMAGES += kernel1.bin rootfs0.bin breed.bin
-  IMAGE/kernel1.bin := append-kernel
-  IMAGE/rootfs0.bin := append-ubi | check-size $$$$(IMAGE_SIZE)
-  IMAGE/breed.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-kernel | \
-  	pad-to $$(KERNEL_SIZE) | append-ubi | check-size $$$$(IMAGE_SIZE)
-  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
-  DEVICE_TITLE := Beeline SmartBox PRO
-  DEVICE_PACKAGES := kmod-mt76x2 kmod-usb3 kmod-usb-ledtrig-usbport uboot-envtools wpad-basic
-endef
-TARGET_DEVICES += beeline_smartbox-pro
 
 
 define Device/mt7621

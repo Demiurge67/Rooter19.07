@@ -1,0 +1,22 @@
+Source-Makefile: feeds/modemfeed/luci/applications/luci-app-cellled/Makefile
+Build-Depends: lua/host luci-base/host LUCI_CSSTIDY:csstidy/host 
+
+Package: luci-app-cellled
+Submenu: 3. Applications
+Version: 0.1.0-0-1
+Depends: +libc +GCC_LIBSSP:libssp +USE_GLIBC:librt +USE_GLIBC:libpthread +cellled
+Conflicts: 
+Menu-Depends: 
+Provides: 
+Section: luci
+Category: LuCI
+Repository: base
+Title: LuCI application for showing cellular RSSI LED
+Maintainer: 
+Source: 
+Type: ipkg
+Description: LuCI application for showing cellular RSSI LED
+
+@@
+
+

@@ -1,0 +1,22 @@
+Source-Makefile: feeds/modemfeed/luci/protocols/luci-proto-xmm/Makefile
+Build-Depends: lua/host luci-base/host LUCI_CSSTIDY:csstidy/host 
+
+Package: luci-proto-xmm
+Submenu: 5. Protocols
+Version: x-1
+Depends: +libc +GCC_LIBSSP:libssp +USE_GLIBC:librt +USE_GLIBC:libpthread +xmm-modem
+Conflicts: 
+Menu-Depends: 
+Provides: 
+Section: luci
+Category: LuCI
+Repository: base
+Title: Support for Intel XMM
+Maintainer: 
+Source: 
+Type: ipkg
+Description: Support for Intel XMM
+
+@@
+
+

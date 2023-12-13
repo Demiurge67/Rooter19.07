@@ -228,6 +228,7 @@ ramips_setup_interfaces()
 			"1:lan" "2:lan" "3:lan" "4:lan" "6t@eth0"
 		;;
 	asus,rt-ac57u|\
+	asus,rt-ac56u-b1|\
 	atp-52b|\
 	awm002-evb-4M|\
 	awm002-evb-8M|\
@@ -258,13 +259,25 @@ ramips_setup_interfaces()
 	ubnt-erx-sfp|\
 	ur-326n4g|\
 	wrtnode|\
-	wrtnode2p | \
-	wrtnode2r | \
+	wrtnode2p |\
+	wrtnode2r |\
 	youhua,wr1200js|\
 	zbt-wa05|\
+	beeline,smartbox-turbo|\
+	beeline,smartbox-turbo-plus|\
+	beeline,smartbox-pro|\
+	wifire,s1500-nbn|\
+	beeline,sb-turbo-plus-breed|\
+	beeline,sbtplus)|\
+	beeline,sbtplusspi)|\
 	zyxel,keenetic-extra-ii)
 		ucidef_add_switch "switch0" \
 			"1:lan" "2:lan" "3:lan" "4:lan" "0:wan" "6@eth0"
+		;;
+	beeline,sbgiga)|\
+	beeline,sbgigaspi)
+		ucidef_add_switch "switch0" \
+			"1:lan" "2:lan" "0:wan" "6@eth0"
 		;;
 	mikrotik,rbm33g)
 		ucidef_add_switch "switch0" \
@@ -682,6 +695,16 @@ ramips_setup_macs()
 	w306r-v20)
 		lan_mac=$(cat /sys/class/net/eth0/address)
 		wan_mac=$(macaddr_add "$lan_mac" 5)
+		;;
+	beeline,smartbox-flash)
+		wan_mac=$(mtd_get_mac_encrypted_arcadyan "board_data")
+		label_mac=$(macaddr_add "$wan_mac" 3)
+		lan_mac=$label_mac
+		;;
+	mts,wg430223)
+		wan_mac=$(mtd_get_mac_encrypted_arcadyan "board_data")
+		label_mac=$wan_mac
+		lan_mac=$(macaddr_add "$wan_mac" 2)
 		;;
 	wcr-1166ds|\
 	wsr-1166)

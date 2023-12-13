@@ -7,8 +7,8 @@
 #include <dt-bindings/input/input.h>
 
 / {
-	compatible = "beeline,smartbox-turbo-plus", "mediatek,mt7621-soc";
-	model = "Beeline SmartBox TURBO+";
+	compatible = "beeline,sb-turbo-plus", "mediatek,mt7621-soc";
+	model = "Beeline SmartBox TURBO+ (breed)";
 
 	aliases {
 		led-boot = &led_status_blue;

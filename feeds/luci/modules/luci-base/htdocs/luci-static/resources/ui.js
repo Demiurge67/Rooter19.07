@@ -1306,8 +1306,6 @@ var UIDropdown = UIElement.extend(/** @lends LuCI.ui.Dropdown.prototype */ {
 
 	/** @private */
 	toggleItem: function(sb, li, force_state) {
-		var ul = li.parentNode;
-
 		if (li.hasAttribute('unselectable'))
 			return;
 
@@ -1384,7 +1382,7 @@ var UIDropdown = UIElement.extend(/** @lends LuCI.ui.Dropdown.prototype */ {
 			this.closeDropdown(sb, true);
 		}
 
-		this.saveValues(sb, ul);
+		this.saveValues(sb, li.parentNode);
 	},
 
 	/** @private */

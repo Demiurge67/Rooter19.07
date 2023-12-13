@@ -1,0 +1,23 @@
+Source-Makefile: feeds/modemfeed/luci/applications/luci-app-3proxy/Makefile
+Build-Depends: lua/host luci-base/host LUCI_CSSTIDY:csstidy/host 
+
+Package: luci-app-3proxy
+Submenu: 3. Applications
+Version: 0.0.1-3
+Depends: +libc +GCC_LIBSSP:libssp +USE_GLIBC:librt +USE_GLIBC:libpthread +3proxy +luci-compat
+Conflicts: 
+Menu-Depends: 
+Provides: 
+Section: luci
+Category: LuCI
+Repository: base
+Title: 3proxy simple webUI
+Maintainer: 
+Source: 
+License: GPLv3
+Type: ipkg
+Description: 3proxy simple webUI
+
+@@
+
+
