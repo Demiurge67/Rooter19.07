@@ -7,59 +7,35 @@
 include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/image.mk
 
-DEVICE_VARS += DTS IMAGE_SIZE NETGEAR_BOARD_ID NETGEAR_HW_ID
+DEVICE_VARS += LOADER_TYPE LOADER_FLASH_OFFS LZMA_TEXT_START
+DEVICE_VARS += NETGEAR_BOARD_ID NETGEAR_HW_ID
+DEVICE_VARS += NETGEAR_ENC_MODEL NETGEAR_ENC_REGION NETGEAR_ENC_HW_ID_LIST NETGEAR_ENC_MODEL_LIST
 DEVICE_VARS += BUFFALO_TAG_PLATFORM BUFFALO_TAG_VERSION BUFFALO_TAG_MINOR
 DEVICE_VARS += SEAMA_SIGNATURE SEAMA_MTDBLOCK
-DEVICE_VARS += SERCOMM_HWID SERCOMM_HWVER SERCOMM_SWVER
-DEVICE_VARS += JCG_MAXSIZE
+DEVICE_VARS += SERCOMM_HWNAME SERCOMM_HWID SERCOMM_HWVER SERCOMM_SWVER
+DEVICE_VARS += SERCOMM_PAD JCG_MAXSIZE
 
 loadaddr-y := 0x80000000
 loadaddr-$(CONFIG_TARGET_ramips_rt288x) := 0x88000000
 loadaddr-$(CONFIG_TARGET_ramips_mt7621) := 0x80001000
 
+ldrplatform-y := ralink
+ldrplatform-$(CONFIG_TARGET_ramips_mt7621) := mt7621
+
+ldrflashstart-y := 0x1c000000
+ldrflashstart-$(CONFIG_TARGET_ramips_mt7621) := 0x1fc00000
+
 KERNEL_LOADADDR := $(loadaddr-y)
+LOADER_PLATFORM := $(ldrplatform-y)
+LOADER_FLASH_START := $(ldrflashstart-y)
 
 KERNEL_DTB = kernel-bin | append-dtb | lzma
-define Device/Default
-  PROFILES = Default
-  KERNEL := $(KERNEL_DTB) | uImage lzma
-  DEVICE_DTS_DIR := ../dts
-  DEVICE_DTS = $$(DTS)
-  IMAGES := sysupgrade.bin
-  IMAGE_SIZE := $(ralink_default_fw_size_8M)
-  SUPPORTED_DEVICES := $(subst _,$(comma),$(1))
-  sysupgrade_bin := append-kernel | append-rootfs | pad-rootfs
-  IMAGE/sysupgrade.bin := append-kernel | append-rootfs | pad-rootfs | append-metadata | check-size $$$$(IMAGE_SIZE)
-endef
-
-define Device/seama
-  SEAMA_MTDBLOCK := 2
-  IMAGES += factory.bin
-
-  # 64 bytes offset:
-  # - 28 bytes seama_header
-  # - 36 bytes of META data (4-bytes aligned)
-  IMAGE/default := append-kernel | pad-offset $$$$(BLOCKSIZE) 64 | append-rootfs
-  IMAGE/sysupgrade.bin := \
-	$$(IMAGE/default) | seama | pad-rootfs | append-metadata | check-size $$$$(IMAGE_SIZE)
-  IMAGE/factory.bin := \
-	$$(IMAGE/default) | pad-rootfs -x 64 | seama | seama-seal | check-size $$$$(IMAGE_SIZE)
-  SEAMA_SIGNATURE :=
-endef
 
 define Build/jcg-header
 	$(STAGING_DIR_HOST)/bin/jcgimage -v $(1) \
 		$(if $(JCG_MAXSIZE), -m $$(($(subst k, * 1024,$(JCG_MAXSIZE)))),) \
 		-u $@ -o $@.new
 	mv $@.new $@
-endef
-
-define Build/trx
-	$(STAGING_DIR_HOST)/bin/trx $(1) \
-		-o $@ \
-		-m $(IMAGE_SIZE) \
-		-f $(IMAGE_KERNEL) \
-		-a 4 -f $(IMAGE_ROOTFS)
 endef
 
 define Build/loader-common
@@ -132,10 +108,6 @@ define Build/mkdlinkfw-factory
 	mv $@.new $@
 endef
 
-define Build/zyimage
-	$(STAGING_DIR_HOST)/bin/zyimage $(1) $@
-endef
-
 define Build/sercom-seal
 	$(STAGING_DIR_HOST)/bin/mksercommfw \
 		-i $@ \
@@ -149,12 +121,97 @@ define Build/sercom-footer
 	$(call Build/sercom-seal,-f)
 endef
 
+define Build/trx
+	$(STAGING_DIR_HOST)/bin/trx $(1) \
+		-o $@ \
+		-m $(IMAGE_SIZE) \
+		-f $(IMAGE_KERNEL) \
+		-a 4 -f $(IMAGE_ROOTFS)
+endef
+
+define Build/uimage-padhdr
+	uimage_padhdr $(if $(1),-l $(1)) -i $@ -o $@.new
+	mv $@.new $@
+endef
+
+define Build/uimage-sgehdr
+	uimage_sgehdr -i $@ -o $@.new -m $(DEVICE_MODEL) \
+		-h $(DEVICE_VARIANT) -s V1.00000
+	mv $@.new $@
+endef
+
+define Build/umedia-header
+	fix-u-media-header -T 0x46 -B $(1) -i $@ -o $@.new && mv $@.new $@
+endef
+
+define Build/wrg-header
+	mkwrgimg -i $@ -d "/dev/mtdblock/2" -s $(1) -o $@.new
+	mv $@.new $@
+endef
+
+define Build/zyimage
+	$(STAGING_DIR_HOST)/bin/zyimage $(1) $@
+endef
+
 ralink_default_fw_size_4M=3866624
 ralink_default_fw_size_8M=8060928
 ralink_default_fw_size_16M=16449536
 BuildFirmware/Default16M/squashfs=$(call BuildFirmware/OF,$(1),$(2),$(3),$(ralink_default_fw_size_16M),$(4))
 BuildFirmware/Default16M/initramfs=$(call BuildFirmware/OF/initramfs,$(1),$(2),$(3),$(4))
 ralink_default_fw_size_32M=33226752
+
+define Device/Default
+  PROFILES = Default
+  KERNEL := $(KERNEL_DTB) | uImage lzma
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_DTS = $$(DTS)
+  IMAGES := sysupgrade.bin
+  IMAGE_SIZE := $(ralink_default_fw_size_8M)
+  SUPPORTED_DEVICES := $(subst _,$(comma),$(1))
+  sysupgrade_bin := append-kernel | append-rootfs | pad-rootfs
+  IMAGE/sysupgrade.bin := append-kernel | append-rootfs | pad-rootfs | check-size | append-metadata
+endef
+
+define Device/netgear_sercomm_nor
+  DEVICE_VENDOR := NETGEAR
+  IMAGES += factory.img
+  IMAGE/default := append-kernel | pad-to $$$$(BLOCKSIZE) | append-rootfs | \
+	pad-rootfs
+  IMAGE/sysupgrade.bin := $$(IMAGE/default) | check-size | append-metadata
+  IMAGE/factory.img := pad-extra $$$$(SERCOMM_PAD) | $$(IMAGE/default) | \
+	pad-to $$$$(BLOCKSIZE) | sercom-footer | pad-to 128 | \
+	zip $$$$(SERCOMM_HWNAME).bin | sercom-seal
+endef
+
+define Device/seama
+  SEAMA_MTDBLOCK := 2
+  IMAGES += factory.bin
+
+  # 64 bytes offset:
+  # - 28 bytes seama_header
+  # - 36 bytes of META data (4-bytes aligned)
+  IMAGE/default := append-kernel | pad-offset $$$$(BLOCKSIZE) 64 | append-rootfs
+  IMAGE/sysupgrade.bin := \
+	$$(IMAGE/default) | seama | pad-rootfs | append-metadata | check-size $$$$(IMAGE_SIZE)
+  IMAGE/factory.bin := \
+	$$(IMAGE/default) | pad-rootfs -x 64 | seama | seama-seal | check-size $$$$(IMAGE_SIZE)
+  SEAMA_SIGNATURE :=
+endef
+
+define Device/uimage-lzma-loader
+  LOADER_TYPE := bin
+  KERNEL/lzma-loader := kernel-bin | append-dtb | lzma | loader-kernel
+  KERNEL := $$(KERNEL/lzma-loader) | uImage none
+endef
+
+define Device/seama-lzma-loader
+  $(Device/seama)
+  $(Device/uimage-lzma-loader)
+  KERNEL := $$(KERNEL/lzma-loader) | relocate-kernel | lzma -a0
+  KERNEL_INITRAMFS := $$(KERNEL/lzma-loader) | uImage none
+endef
+
+
 
 ifeq ($(SUBTARGET),rt288x)
 include rt288x.mk
