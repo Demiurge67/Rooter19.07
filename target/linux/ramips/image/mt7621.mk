@@ -172,10 +172,6 @@ define Device/beeline_smartbox-turbo-plus
   SERCOMM_SWVER := 2010 
   KERNEL := kernel-bin | append-dtb | lzma | loader-kernel | lzma -a0 | \
 	uImage lzma
-  IMAGE/factory.img := append-kernel | sercomm-kernel-factory | \
-	append-ubi | sercomm-factory-cqr
-  IMAGE/sysupgrade.bin := append-kernel | sercomm-kernel | \
-	sysupgrade-tar kernel=$$$$@ | append-metadata
   DEVICE_TITLE := Beeline SmartBox TURBO+ AC2000
   DEVICE_PACKAGES := kmod-mt7603 kmod-mt7615e kmod-usb3 kmod-usb-ledtrig-usbport uboot-envtools
 endef
