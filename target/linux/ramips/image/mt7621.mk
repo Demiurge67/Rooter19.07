@@ -219,11 +219,14 @@ TARGET_DEVICES += beeline_smartbox-pro
 define Device/wifire_s1500-nbn
   $(Device/sercomm_s1500)
   DTS := mt7621_wifire_s1500-nbn
+  BLOCKSIZE := 128k
+  PAGESIZE := 2048
+  KERNEL_SIZE:= 4096k
+  IMAGE_SIZE := 255488k
   DEVICE_VENDOR := WiFire
   DEVICE_MODEL := S1500.NBN
   DEVICE_ALT0_VENDOR := Sercomm
   DEVICE_ALT0_MODEL := S1500 BUC
-  IMAGE_SIZE := 51200k
   IMAGE/factory.img := append-kernel | sercomm-kernel-factory | \
 	sercomm-reset-slot1-chksum | append-ubi | check-size | \
 	sercomm-factory-cqr | sercomm-fix-buc-pid | sercomm-mkhash | \
