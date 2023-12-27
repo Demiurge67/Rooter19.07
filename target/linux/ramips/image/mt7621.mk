@@ -197,7 +197,7 @@ define Device/beeline_sb-turbo-plus
 endef
 TARGET_DEVICES += beeline_sb-turbo-plus
 
-define Device/beeline_smartbox-pro
+define Device/beeline_smartbox-pro-breed
   $(Device/uimage-lzma-loader)
   DTS := BeelineSB-Pro
   BLOCKSIZE := 128k
@@ -214,7 +214,7 @@ define Device/beeline_smartbox-pro
   DEVICE_TITLE := Beeline SmartBox PRO (breed)
   DEVICE_PACKAGES := kmod-mt76x2 kmod-usb3 kmod-usb-ledtrig-usbport uboot-envtools 
 endef
-TARGET_DEVICES += beeline_smartbox-pro
+TARGET_DEVICES += beeline_smartbox-pro-breed
 
 define Device/wifire_s1500-nbn
   $(Device/sercomm_s1500)
@@ -229,7 +229,7 @@ define Device/wifire_s1500-nbn
   DEVICE_ALT0_VENDOR := Sercomm
   DEVICE_ALT0_MODEL := S1500 BUC
   IMAGE/factory.img := append-kernel | sercomm-kernel-factory | \
-	sercomm-reset-slot1-chksum | append-ubi | check-size | \
+	sercomm-reset-slot1-chksum | append-ubi | \
 	sercomm-factory-cqr | sercomm-fix-buc-pid | sercomm-mkhash | \
 	sercomm-crypto
   SERCOMM_HWID := BUC
