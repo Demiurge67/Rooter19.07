@@ -70,8 +70,8 @@ endef
 
 define Build/sercomm-mkhash
 	dd bs=$$((0x400)) skip=1 if=$@ conv=notrunc 2>/dev/null | \
-		$(mkhash) md5 | awk '{print $$1}' | tr -d '\n' | \
-		dd seek=$$((0x1e0)) of=$@ bs=1 conv=notrunc 2>/dev/null
+	$(STAGING_DIR_HOST)/bin/mkhash md5 | awk '{print $$1}' | tr -d '\n' | \
+	dd seek=$$((0x1e0)) of=$@ bs=1 conv=notrunc 2>/dev/null
 endef
 
 define Build/sercomm-part-tag
