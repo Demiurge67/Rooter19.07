@@ -45,7 +45,7 @@
 	};
 
 	ubiconcat0: partition@1f00000 {
-		label = "RootFS_1";
+		label = "rootfs";
 		reg = <0x1f00000 0x2e00000>;
 	};
 
