@@ -167,5 +167,5 @@ define Device/sercomm_s1500
 	lzma -a0 | uImage lzma
   IMAGE/sysupgrade.bin := append-kernel | sercomm-kernel | \
 	sysupgrade-tar kernel=$$$$@ | append-metadata
-  DEVICE_PACKAGES := kmod-mt76x2 kmod-usb2
+  DEVICE_PACKAGES := kmod-mt76x2 kmod-usb2 kmod-usb-ledtrig-usbport uboot-envtools
 endef
